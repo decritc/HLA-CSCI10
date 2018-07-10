@@ -1,0 +1,221 @@
+/*
+ * Demonstration of basic FPU instructions.
+ */
+program Floaties;
+
+#include ("stdlib.hhf")
+
+procedure getReal32; @returns("eax"); @forward;
+procedure showBits (value: dword; showBrackets: boolean); @forward;
+
+procedure getReal32;
+
+var
+	inputReal32: real32;
+
+begin getReal32;
+
+	push(ecx);
+
+	forever
+		try
+			stdin.flushInput();
+			stdin.getf();
+			unprotected
+				fst(inputReal32);
+				mov(inputReal32, eax);
+				fstp(st0);
+				break;
+		anyexception
+			stdout.put("Invalid input.", nl, nl);
+		endtry;
+	endfor;
+
+	pop(ecx);
+
+end getReal32;
+
+procedure showBits (value: dword; showBrackets: boolean);
+begin showBits;
+
+	pushad();
+
+	if (showBrackets) then
+		stdout.put(" [");
+	endif;
+	stdout.put("%");
+	mov(value, ebx);
+	for (mov(0, ecx); ecx<32; inc(ecx)) do
+
+		shl(1, ebx);
+
+		if (@c) then
+			stdout.put("1");
+		else
+			stdout.put("0");
+		endif;
+
+		mov(ecx, eax);
+		inc(eax);
+		mov(0, edx);
+		div(4, edx:eax);
+		if (ecx == 0 || ecx == 8) then
+			stdout.put("_");
+		endif;
+
+	endfor;
+	if (showBrackets) then
+		stdout.put("]");
+	endif;
+	stdout.newln();
+
+	popad();
+
+end showBits;
+
+static
+	temperatures: real32[31];
+	tempReal: real32;
+	numTempsToAverage: uns32;
+	average: real32;
+
+begin Floaties;
+
+	forever
+
+		console.cls();
+
+		stdout.put("[1] Check a floating point -> binary conversion", nl);
+		stdout.put("[2] Experiment with some floating point math and comparisons", nl);
+		stdout.put("[0] Exit", nl);
+		stdout.put("your choice: ");
+		stdin.getu8();
+
+		console.cls();
+
+		if (al == 0) then
+
+			break;
+
+		elseif (al == 1) then
+
+			stdout.put("Enter a real32 floating point value: ");
+			mov(getReal32(), tempReal);
+
+			stdout.put(nl, nl);
+			stdout.putsSize("Your input value:", -20, ' ');
+			stdout.putr32(tempReal, 11, 5, ' ');
+
+			stdout.put(nl, nl);
+			stdout.putsSize("In binary:", -24, ' ');
+			showBits(tempReal, false);
+
+		else
+
+			stdout.put("How many temperatures to input (1-31)? ");
+			stdin.flushInput();
+			stdin.getu32();
+			mov(eax, numTempsToAverage);
+
+			stdout.put(nl, nl, "Temperatures should be entered as floating point values", nl, nl);
+			stdout.put("Press ENTER to begin");
+			stdin.flushInput();
+			stdin.readLn();
+
+			console.cls();
+
+			mov(&temperatures, ebx);
+			for (mov(0, ecx); ecx<numTempsToAverage; inc(ecx)) do
+
+				inc(ecx);
+				stdout.put("Enter temperature #", (type uns32 ecx), ": ");
+				dec(ecx);
+
+				mov(getReal32(), [ebx+ecx*4]);
+
+			endfor;
+
+			stdout.put(nl, nl, "Press ENTER to see calculations");
+			stdin.flushInput();
+			stdin.readLn();
+
+			console.cls();
+
+			stdout.put(nl, "Here are the temperatures you entered:", nl);
+
+			for (mov(0, ecx); ecx<numTempsToAverage; inc(ecx)) do
+
+				stdout.putr32(temperatures[ecx*4], 8, 2, ' ');
+
+				if (ecx == 9 || ecx == 18 || ecx == 27) then
+					stdout.newln();
+				endif;
+
+			endfor;
+
+			stdout.put(nl, nl);
+			stdout.putsSize("Highest temperature recorded:", -31, ' ');
+			mov(0, ecx);
+			fld(temperatures[ecx]);
+			for (mov(1, ecx); ecx<numTempsToAverage; inc(ecx)) do
+				fcom(temperatures[ecx*4]);
+				fstsw(ax);
+				sahf();
+				setb(al);
+				if (al) then
+					fstp(st0);
+					fld(temperatures[ecx*4]);
+				endif;
+			endfor;
+			fst(tempReal);
+			stdout.putr32(tempReal, 8, 2, ' ');
+			stdout.put(" ");
+			showBits(tempReal, true);
+			fstp(st0);
+
+			stdout.put(nl, nl);
+			stdout.putsSize("Lowest temperature recorded:", -31, ' ');
+
+      mov(0, ecx);
+			fld(temperatures[ecx]);
+			for (mov(1, ecx); ecx<numTempsToAverage; inc(ecx)) do
+				fcom(temperatures[ecx*4]);
+				fstsw(ax);
+				sahf();
+				seta(al);
+				if (al) then
+					fstp(st0);
+					fld(temperatures[ecx*4]);
+				endif;
+			endfor;
+			fst(tempReal);
+			stdout.putr32(tempReal, 8, 2, ' ');
+			stdout.put(" ");
+			showBits(tempReal, true);
+			fstp(st0);
+
+			stdout.put(nl, nl);
+			stdout.putsSize("Average temperature:", -31, ' ');
+			mov(0, ecx);
+			fld(temperatures[ecx]);
+			for (mov(1, ecx); ecx<numTempsToAverage; inc(ecx)) do
+				fadd(temperatures[ecx*4]);
+			endfor;
+			fild(numTempsToAverage);
+			fdiv();
+			fxch();
+			fst(tempReal);
+			stdout.putr32(tempReal, 8, 2, ' ');
+			stdout.put(" ");
+			showBits(tempReal, true);
+			fstp(st0);
+
+		endif;
+
+		stdout.put(nl, nl, "Press ENTER to continue");
+		stdin.flushInput();
+		stdin.readLn();
+
+	endfor;
+
+end Floaties;

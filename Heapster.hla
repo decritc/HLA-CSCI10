@@ -1,0 +1,45 @@
+program Heapster;
+
+#include("stdlib.hhf");
+
+static
+  numbers: int16[5] := 5 dup [0];
+  arraySize: uns32 := 5;
+
+procedure displayCells(address: dword; size: uns32);
+begin displayCells;
+  push(eax);
+  push(ecx);
+
+  mov(address, eax);
+  for (mov(0, ecx); ecx<size; inc(ecx)) do
+    stdout.put((type int16 [eax + ecx * 2]), ' ');
+  endfor;
+  stdout.newln();
+
+  pop(ecx);
+  pop(eax);
+end displayCells;
+
+procedure editCell(address: dword; index: uns32);
+begin editCell;
+  stdout.put("Enter a new int16 value: ");
+  stdin.flushInput();
+  stdin.geti16();
+  mov(address, ebx);
+  mov(index, ecx);
+  mov(ax, (type int16 [ebx + ecx * 2]));
+
+end editCell;
+
+begin Heapster;
+  forever
+    console.cls();
+    displayCells(&numbers, arraySize);
+
+    editCell(&numbers, 1);
+    stdout.put(nl, "Go again [y/n] ? ");
+    stdin.flushInput();
+    breakif(chars.toUpper(stdin.getc()) == 'N');
+  endfor;
+end Heapster;

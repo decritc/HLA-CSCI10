@@ -1,0 +1,163 @@
+/*
+ * HLA Programming Challenge 7
+ *
+ * written by			Derek Critchfield
+ * created on			9 October 2017
+ * last modified on		11 October 2017
+ *
+ * This program asks the user for four numbers beteen 1-255 then returns
+ * The numbers, a bar graph representing the each values in terms of 10,
+ * the total and average for those values, and the minimum and maximum
+ * value from the list.
+ *
+ */
+program ProgrammingChallenge7;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+
+// procedure forward declarations
+// prompts user and collects their credits
+procedure getUns8(prompt:string; min:uns8; max:uns8); @forward;
+procedure showGraph(value: uns8); @forward;
+procedure totalAndAverage(param1: uns8; param2: uns8; param3: uns8; param4: uns8); @forward;
+procedure min(param1: uns8; param2: uns8; param3: uns8; param4: uns8); @forward;
+procedure max(param1: uns8; param2: uns8; param3: uns8; param4: uns8); @forward;
+
+// procedure definitions
+procedure getUns8(prompt:string; min:uns8; max:uns8);
+begin getUns8;
+  push(ebx);
+  push(ecx);
+  forever;
+    try
+      stdout.put(nl, prompt);
+      stdin.flushInput();
+      stdin.getu8();
+      unprotected
+      if (al >= min && al <= max) then
+        break;
+      else
+        stdout.put("Enter a value between ", min, " and ", max, ".", nl);
+      endif;
+    anyexception
+      stdout.put("Try again.", nl);
+    endtry;
+  endfor;
+  pop(ecx);
+  pop(ebx);
+end getUns8;
+
+procedure showGraph(value: uns8);
+begin showGraph;
+  push(eax);
+  stdout.put(nl, value);
+  mov(value, al);
+  while(al >= 10) do
+    sub(10, al);
+    stdout.put("*");
+  endwhile;
+  pop(eax);
+end showGraph;
+
+procedure totalAndAverage(param1: uns8; param2: uns8; param3: uns8; param4: uns8);
+begin totalAndAverage;
+push(eax);
+push(ebx);
+push(edx);
+mov(param1, al);
+mov(0, ah);
+mov(param2, bl);
+mov(0, bh);
+add(bx, ax);
+mov(param3, bl);
+mov(0, bh);
+add(bx, ax);
+mov(param4, bl);
+mov(0, bh);
+add(bx, ax);
+stdout.put(nl, "Total: ", (type uns16 ax), nl);
+mov(4, bx);
+mov(0, dx);
+div(bx, dx:ax);
+stdout.put("Average: ", (type uns16 ax), nl);
+pop(edx);
+pop(ebx);
+pop(eax);
+end totalAndAverage;
+
+procedure min(param1: uns8; param2: uns8; param3: uns8; param4: uns8);
+begin min;
+push(eax);
+mov(param1, al);
+if(param2 < al) then
+  mov(param2, al);
+endif;
+if(param3 < al) then
+  mov(param3, al);
+endif;
+if(param4 < al) then
+  mov(param4, al);
+endif;
+stdout.put(nl, "min: ", (type uns8 al), nl);
+pop(eax);
+end min;
+
+procedure max(param1: uns8; param2: uns8; param3: uns8; param4: uns8);
+begin max;
+push(eax);
+mov(param1, al);
+if(param2 > al) then
+  mov(param2, al);
+endif;
+if(param3 > al) then
+  mov(param3, al);
+endif;
+if(param4 > al) then
+  mov(param4, al);
+endif;
+stdout.put("max: ", (type uns8 al), nl);
+pop(eax);
+end max;
+
+begin ProgrammingChallenge7;
+
+// program instructions
+  forever
+    stdout.put("Please enter 4 numbers betweeen [1-255]", nl);
+    getUns8("enter the first number: ", 1, 255);
+    push(eax);
+    getUns8("enter the second number: ", 1, 255);
+    mov(al, bl);
+    getUns8("enter the third number: ", 1, 255);
+    mov(al, cl);
+    getUns8("enter the fourth number: ", 1, 255);
+    mov(al, dl);
+    pop(eax);
+    stdin.flushInput();
+    //display the numbers in decimal format
+    stdout.put(nl, "First: ",(type uns8 al), nl);
+    stdout.put("Second: ",(type uns8 bl), nl);
+    stdout.put("Third: ",(type uns8 cl), nl);
+    stdout.put("Fourth: ",(type uns8 dl), nl);
+
+    showGraph(al);
+    showGraph(bl);
+    showGraph(cl);
+    showGraph(dl);
+    stdout.newln();
+
+    totalAndAverage(al, bl, cl, dl);
+
+    min(al, bl, cl, dl);
+    max(al, bl, cl, dl);
+
+    stdout.put(nl, "Would you like run the program again (Y/N):");
+    stdin.getc();
+    breakif(al == 'N' || al == 'n');
+    stdin.flushInput();
+  endfor;
+
+end ProgrammingChallenge7;

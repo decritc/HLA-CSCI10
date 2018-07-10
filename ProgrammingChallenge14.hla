@@ -1,0 +1,199 @@
+/*
+ * HLA Starter
+ *
+ * written by			Derek Critchfield
+ * created on			10 August 2017
+ * last modified on		10 August 2017
+ *
+ * This program is provided as an example of source code documentation
+ * for CSCI 10 at Butte College. A brief description should be provided
+ * for each program you implement in this course.
+ *
+ */
+ /*
+  * COMPLETE THE PROGRAM DOCUMENTATION HERE
+  *
+  */
+ program ProgrammingChallengeFourteen;
+
+ #include ("stdlib.hhf")
+
+ procedure getInt8 (prompt: string; min: int8; max: int8); @returns("al"); @forward;
+
+ procedure getInt8 (prompt: string; min: int8; max: int8);
+ begin getInt8;
+
+push(edx);
+push(ecx);
+push(ebx);
+
+GETINT8_FOREVER_START_:
+try
+stdout.put(nl, prompt, " (", min, " to ", max, "): ");
+stdin.flushInput();
+stdin.geti8();
+unprotected
+ cmp((type int8 al), min);
+ jl INT8_BAD;
+ cmp((type int8 al), max);
+ jg INT8_BAD;
+ jmp GETINT8_FOREVER_END_;
+ INT8_BAD:
+     stdout.put(nl, "Value not in required range.");
+anyexception
+stdout.put(nl, "Invalid input.");
+endtry;
+jmp GETINT8_FOREVER_START_;
+GETINT8_FOREVER_END_:
+pop(ebx);
+pop(ecx);
+pop(edx);
+
+end getInt8;
+
+static
+input: int8;
+isPrime: boolean;
+
+begin ProgrammingChallengeFourteen;
+
+START_FOREVER_LOOP_:
+
+console.cls();
+
+mov(getInt8("Please enter an int8", -127, 127), input);
+
+stdout.put(nl, "What do you want to do with your input value?", nl);
+stdout.put("1. Test to see if it is negative", nl);
+stdout.put("2. Test to see if it is even", nl);
+stdout.put("3. Reverse its sign", nl);
+stdout.put("4. Test to see if it is prime", nl);
+stdout.put("your choice: ");
+getInt8("your choice", 1, 4);
+
+console.cls();
+
+mov(1, bl);
+cmp(bl, al);
+jnz CHECK_2;
+mov(input, bh);
+mov(0, bl);
+cmp(bl, bh);
+js ValueIsPositive;
+stdout.put(input, " is a negative value.", nl);
+jmp END_CHECKS;
+ValueIsPositive:
+stdout.put(input, " is greater than or equal to zero.", nl);
+jmp END_CHECKS;
+CHECK_2:
+mov(2, bl);
+cmp(bl, al);
+jnz CHECK_3;
+mov(0, ah);
+mov(input, al);
+idiv(2, ax);
+mov(0, bl);
+cmp(bl, ah);
+jnz ELSE_1;
+stdout.put(input, " is an even number.", nl);
+jmp END_CHECKS;
+ELSE_1:
+stdout.put(input, " is an odd number.", nl);
+jmp END_CHECKS;
+CHECK_3:
+mov(3, bl);
+cmp(bl, al);
+jnz FINAL_ELSE;
+mov(input, al);
+not(al);
+add(1, al);
+stdout.put(input, " sign reversed is ", (type int8 al), nl);
+jmp END_CHECKS;
+FINAL_ELSE:
+mov(input, bh);
+mov(0, bl);
+cmp(bl, bh);
+js SECOND_IF;
+stdout.put("Reversing the sign.", nl, nl);
+mov(input, al);
+not(al);
+add(1, al);
+mov(al, input);
+SECOND_IF:
+mov(true, isPrime);
+mov(input, bh);
+mov(2, bl);
+cmp(bl, bh);
+js ELSE_2;
+je ELSE_2;
+mov(false, isPrime);
+jmp LAST_IF;
+ELSE_2:
+mov(2, cl);
+START_INNER_FOR_:
+cmp(cl, input);
+jae END_INNER_FOR_;
+mov(0, ah);
+mov(input, al);
+div(cl, ax);
+mov(0, bl);
+cmp(bl, ah);
+jne CONTINUE_LOOP;
+mov(false, isPrime);
+jmp END_INNER_FOR_;
+CONTINUE_LOOP:
+inc(cl);
+jmp START_INNER_FOR_;
+END_INNER_FOR_:
+LAST_IF:
+mov(isPrime, bh);
+mov(true, bl);
+cmp(bl, bh);
+jne IS_FALSE;
+stdout.put(input, " is a prime number.", nl);
+jmp END_CHECKS;
+IS_FALSE:
+stdout.put(input, " is not a prime number.", nl);
+END_CHECKS:
+
+stdout.put(nl, nl, "Go again (y/n)? ");
+stdin.flushInput();
+
+cmp(chars.toUpper(stdin.getc()), 'N'); // NEED CODE TO FORCE UPPER-CASE
+jne START_FOREVER_LOOP_;
+
+START_FOREVER_LOOP_2_:
+
+        console.cls();
+
+        mov(getInt8("Please enter an int8", 1, 20), input);
+
+        stdout.put(nl, "counting up...", nl);
+        mov(1, cl);
+        START_INNER_FOR_2_:
+        cmp(cl, input);
+        ja END_INNER_FOR_2_;
+            stdout.put((type uns8 cl), " ");
+        inc(cl);
+        jmp START_INNER_FOR_2_;
+        END_INNER_FOR_2_:
+        stdout.newln();
+
+        stdout.put(nl, "counting down...", nl);
+        mov(input, cl);
+        START_INNER_WHILE_:
+        cmp(cl, 0);
+        jz END_INNER_WHILE_;
+            stdout.put((type uns8 cl), " ");
+            dec(cl);
+        jmp START_INNER_WHILE_;
+        END_INNER_WHILE_:
+        stdout.newln();
+
+        stdout.put(nl, nl, "Go again (y/n)? ");
+        stdin.flushInput();
+
+        cmp(chars.toUpper(stdin.getc()), 'N'); // NEED CODE TO FORCE UPPER-CASE
+        jne START_FOREVER_LOOP_2_;
+
+end ProgrammingChallengeFourteen;

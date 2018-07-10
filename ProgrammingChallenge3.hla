@@ -1,0 +1,84 @@
+/*
+ * Programming Challenge 3
+ *
+ * written by			Derek Critchfield
+ * created on			6 September 2017
+ * last modified on		6 September 2017
+ *
+ * This program is a number guessing game in which the player will get 10
+ * chances to guess a number between 1-100 with informing them whether there
+ * guess is too high or too low. If you get the number right you win.
+ *
+ */
+program Starter;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+static
+  var1: uns8;
+  randomNumber: uns32;
+  guess: uns32;
+  myChar: char;
+
+// procedure forward declarations
+procedure getUns32; @forward;
+
+// procedure definitions
+procedure getUns32;
+begin getUns32;
+  forever;
+    try
+      stdout.put (nl, "What is your guess number ", var1, ": ");
+      stdin.flushInput();
+      stdin.getu32();
+      unprotected break;
+    anyexception
+      stdout.put ("Try again.", nl);
+    endtry;
+  endfor;
+end getUns32;
+
+begin Starter;
+
+// program instructions
+  stdout.put (nl,"Welcome to the number guessing game!", nl);
+  stdout.put ("In this game you will guess a number between 1-100.", nl,
+              "You will have 10 guesses and be told whether your", nl,
+              "guess is too high or too low.", nl);
+  rand.randomize();
+  forever
+    rand.urange(1,100);
+    mov(eax, randomNumber);
+    mov (1, var1);
+    repeat
+      repeat
+        getUns32();
+        mov (eax, guess);
+        if (guess > 100 || guess < 1) then
+          stdout.put("Your guess must be between 1-100. Try Again." nl);
+        endif;
+      until (guess <= 100 && guess >= 1);
+      if (eax = randomNumber) then
+        stdout.put ("You guessed correctly!", nl);
+        break;
+      elseif (eax > randomNumber) then
+        stdout.put ("Your guess is too high!", nl);
+      else
+        stdout.put ("Your guess is too low!", nl);
+      endif;
+      add (1, var1);
+    until (var1 > 10);
+    if (eax != randomNumber) then
+      stdout.put ("The correct number was ", randomNumber, ".", nl);
+    endif;
+    stdout.put ("Would you like to play again? (Y/N): ");
+    stdin.flushInput();
+    stdin.getc ();
+    mov (al, myChar);
+    if (myChar = 'N' || myChar = 'n' ) then
+      break;
+    endif;
+  endfor;
+end Starter;

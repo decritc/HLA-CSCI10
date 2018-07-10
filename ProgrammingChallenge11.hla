@@ -1,0 +1,125 @@
+/*
+ * ProgrammingChallenge11
+ *
+ * written by			Derek Critchfield
+ * created on			8 November 2017
+ * last modified on		8 November 2017
+ *
+ * This program creates 3 arrays and displays them and then randomizes the values;
+ * Displays them again, resets them, then displays them again.
+ *
+ */
+program ProgrammingChallenge11;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+static
+  array8: int8[10] := 10 dup [0];
+  array16: int16[10] := 10 dup [0];
+  array32: int32[10] := 10 dup [0];
+
+// procedure forward declarations
+procedure displayCells(address:dword; number_of_cells:uns32; dataType:uns8); @forward;
+procedure resetCells(address:dword; number_of_cells:uns32; dataType:uns8); @forward;
+
+// procedure definitions
+procedure displayCells(address:dword; number_of_cells:uns32; dataType:uns8);
+begin displayCells;
+  push(eax);
+  push(ecx);
+  if (dataType == 1) then // int8
+    stdout.put("[ ");
+    mov(address, eax);
+    for(mov(0, ecx); ecx < number_of_cells; inc(ecx)) do
+      stdout.put((type int8 [eax + ecx]), " ");
+    endfor;
+    stdout.put("]", nl);
+  elseif (dataType == 2) then // int16
+    stdout.put("[ ");
+    mov(address, eax);
+    for(mov(0, ecx); ecx < number_of_cells; inc(ecx) ) do
+      stdout.put((type int16 [eax + ecx * 2]), " ");
+    endfor;
+    stdout.put("]", nl);
+  elseif (dataType == 3) then // int32
+    stdout.put("[ ");
+    mov(address, eax);
+    for(mov(0, ecx); ecx < number_of_cells; inc(ecx) ) do
+      stdout.put((type int32 [eax + ecx * 4]), " ");
+    endfor;
+    stdout.put("]", nl);
+  endif;
+  pop(ecx);
+  pop(eax);
+end displayCells;
+
+procedure resetCells(address:dword; number_of_cells:uns32; dataType:uns8);
+begin resetCells;
+  push(eax);
+  push(ebx);
+  push(ecx);
+  mov(0, ebx);
+  if (dataType == 1) then // int8
+    mov(address, eax);
+    for(mov(0, ecx); ecx < number_of_cells; inc(ecx)) do
+      mov(ebx, [eax + ecx]);
+    endfor;
+  elseif (dataType == 2) then // int16
+    mov(address, eax);
+    for(mov(0, ecx); ecx < number_of_cells; inc(ecx) ) do
+      mov(ebx, [eax + ecx * 2]);
+    endfor;
+  elseif (dataType == 3) then // int32
+    mov(address, eax);
+    for(mov(0, ecx); ecx < number_of_cells; inc(ecx) ) do
+      mov(ebx, [eax + ecx * 4]);
+    endfor;
+  endif;
+  pop(ecx);
+  pop(ebx);
+  pop(eax);
+end resetCells;
+
+begin ProgrammingChallenge11;
+  rand.randomize();
+  forever
+// program instructions
+    displayCells(&array8, 10, 1);
+    displayCells(&array16, 10, 2);
+    displayCells(&array32, 10, 3);
+
+    for(mov(0,ecx); ecx < 10; inc(ecx)) do
+      rand.urange(-128, 127);
+      mov(&array8, ebx);
+      mov(eax, [ebx + ecx]);
+      rand.urange(-32768, 32767);
+      mov(&array16, ebx);
+      mov(eax, [ebx + ecx * 2]);
+      rand.urange(-2143648, 2133647);
+      mov(&array32, ebx);
+      mov(eax, [ebx + ecx * 4]);
+    endfor;
+
+    stdout.newln();
+    displayCells(&array8, 10, 1);
+    displayCells(&array16, 10, 2);
+    displayCells(&array32, 10, 3);
+
+    resetCells(&array8, 10, 1);
+    resetCells(&array16, 10, 2);
+    resetCells(&array32, 10, 3);
+
+    stdout.newln();
+    displayCells(&array8, 10, 1);
+    displayCells(&array16, 10, 2);
+    displayCells(&array32, 10, 3);
+
+    stdin.flushInput();
+    stdout.put(nl, "Would you like run the program again (Y/N):");
+    stdin.getc();
+    breakif(al == 'N' || al == 'n');
+    stdin.flushInput();
+  endfor;
+end ProgrammingChallenge11;

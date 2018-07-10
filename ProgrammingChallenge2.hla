@@ -1,0 +1,61 @@
+/*
+ * Programming Challenge #2:
+ *
+ * written by			Derek Critchfield
+ * created on			28 August 2017
+ * last modified on		30 August 2017
+ *
+ * This program gets input from the user for two integers between 1-50 and
+ * compares the two integers providing feedback to the user as to which number
+ * is greater or if they are equivalent.
+ *
+ */
+program ProgrammingChallenge2;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+static
+  X: uns8 := 0;
+  Y: uns8 := 0;
+  myChar: char;
+
+// procedure forward declarations
+
+// procedure definitions
+
+begin ProgrammingChallenge2;
+
+// program instructions
+  stdout.put (nl, "Hello, welcome to the number comparator!", nl);
+  forever
+    repeat
+      stdin.flushInput();
+      stdout.put (nl, "Please enter a X value between 1-50: ");
+      stdin.getu8 ();
+      mov (al, X);
+    until(X > 0 && X <= 50);
+    repeat
+      stdin.flushInput();
+      stdout.put (nl, "Please enter a Y value between 1-50: ");
+      stdin.getu8 ();
+      mov (al, Y);
+    until(Y > 0 && Y <= 50);
+    mov (X, ah);
+    if ( ah > Y ) then
+      stdout.put (nl, "The first number ",X ," is greater than the second number ",Y ,".", nl);
+    elseif ( ah < Y ) then
+      stdout.put (nl, "The second number ",Y ," is greater than the first number ",X ,".", nl);
+    else
+      stdout.put (nl, "The first number ",X ," is equivalent to the second number ",Y ,".", nl);
+    endif;
+    stdin.flushInput();
+    stdout.put (nl, "Would you like to continue (Y/N): ");
+    stdin.getc ();
+    mov (al, myChar);
+    if (myChar = 'N' || myChar = 'n' ) then
+      break;
+    endif;
+    endfor;
+end ProgrammingChallenge2;

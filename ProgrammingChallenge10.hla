@@ -1,0 +1,130 @@
+/*
+ * Programming Challenge #10
+ *
+ * written by			Derek Critchfield
+ * created on			1 November 2017
+ * last modified on		1 November 2017
+ *
+ * This program takes user inputs and shows the address where those inputs are
+ * stored.
+ *
+ */
+program ProgrammingChallenge10;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+static
+  number8:  int8;
+  number16: int16;
+  number32: int32;
+
+// procedure forward declarations
+procedure getInt8(prompt:string; min:int8; max:int8); @forward;
+procedure getInt16(prompt:string; min:int16; max:int16); @forward;
+procedure getInt32(prompt:string; min:int32; max:int32); @forward;
+procedure displayValue(address:dword; datatype:uns8); @forward;
+
+// procedure definitions
+
+procedure getInt8(prompt:string; min:int8; max:int8);
+begin getInt8;
+  push(ebx);
+  forever;
+    try
+      stdout.put(nl, prompt);
+      stdin.flushInput();
+      stdin.geti8();
+      unprotected
+      if (al >= min && al <= max) then
+        break;
+      else
+        stdout.put("Enter a value between ", min, " and ", max, ".", nl);
+      endif;
+    anyexception
+      stdout.put("Try again.", nl);
+    endtry;
+  endfor;
+  pop(ebx);
+end getInt8;
+
+procedure getInt16(prompt:string; min:int16; max:int16);
+begin getInt16;
+  push(ebx);
+  forever;
+    try
+      stdout.put(nl, prompt);
+      stdin.flushInput();
+      stdin.geti16();
+      unprotected
+      if (ax >= min && ax <= max) then
+        break;
+      else
+        stdout.put("Enter a value between ", min, " and ", max, ".", nl);
+      endif;
+    anyexception
+      stdout.put("Try again.", nl);
+    endtry;
+  endfor;
+  pop(ebx);
+end getInt16;
+
+procedure getInt32(prompt:string; min:int32; max:int32);
+begin getInt32;
+  push(ebx);
+  forever;
+    try
+      stdout.put(nl, prompt);
+      stdin.flushInput();
+      stdin.geti32();
+      unprotected
+      if (eax >= min && eax <= max) then
+        break;
+      else
+        stdout.put("Enter a value between ", min, " and ", max, ".", nl);
+      endif;
+    anyexception
+      stdout.put("Try again.", nl);
+    endtry;
+  endfor;
+  pop(ebx);
+end getInt32;
+
+procedure displayValue(address:dword; datatype:uns8);
+begin displayValue;
+  mov(address, ebx);
+  stdout.newln();
+  stdout.put("$", ebx, " = ");
+  if (datatype = 1) then
+    stdout.put((type int8 [ebx]), " (int8)", nl);
+  elseif (datatype = 2) then
+    stdout.put((type int16 [ebx]), " (int16)", nl);
+  else
+    stdout.put((type int32 [ebx]), " (int32)", nl);
+  endif;
+
+end displayValue;
+
+begin ProgrammingChallenge10;
+
+// program instructions
+  forever
+    console.cls();
+    stdout.put("Welcome!", nl);
+    getInt8("Please enter a 8-bit integer: ", -128, 127);
+    mov(al, number8);
+    getInt16("Please enter a 16-bit integer: ", -32768, 32767);
+    mov(ax, number16);
+    getInt32("Please enter a 32-bit integer: ", -2147483648, 214748647);
+    mov(eax, number32);
+    stdin.flushInput();
+    displayValue(&number8, 1);
+    displayValue(&number16, 2);
+    displayValue(&number32, 3);
+    stdout.put(nl, "Would you like run the program again (Y/N):");
+    stdin.getc();
+    breakif(al == 'N' || al == 'n');
+    stdin.flushInput();
+  endfor;
+end ProgrammingChallenge10;

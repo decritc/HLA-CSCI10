@@ -1,0 +1,889 @@
+/*
+ * ProgrammingProject2
+ *
+ * written by			Derek Critchfield
+ * created on			15 November 2017
+ * last modified on		5 December 2017
+ *
+ * This program has the user create an array and allows the user to edit the values
+ * computes and displays the values based on user selection.
+ *
+ */
+program ProgrammingProject2;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+static
+  cells: dword;
+  present: uns8;
+  overflow_error: byte := 0;
+
+// procedure forward declarations
+procedure showBits(value: dword; datatype: uns8); @forward;
+procedure getUns8(prompt:string; min:uns8; max:uns8); @forward;
+procedure getInt8(prompt:string; min:int8; max:int8); @forward;
+procedure getInt16(prompt:string; min:int16; max:int16); @forward;
+procedure getInt32(prompt:string; min:int32; max:int32); @forward;
+procedure displayCells(address: dword; size: uns32; datatype: uns8; calctype: uns8; presentmode: uns8); @forward;
+procedure editCell(address: dword; index: uns32; datatype: uns8); @forward;
+procedure computeSum(address: dword; size: uns32; mtype: uns8); @forward;
+procedure computeAverage(address: dword; size: uns32; mtype: uns8); @forward;
+procedure computeLargest(address: dword; size: uns32; mtype: uns8); @forward;
+procedure computeSmallest(address: dword; size: uns32; mtype: uns8); @forward;
+
+// procedure definitions
+procedure showBits(value: dword; datatype: uns8);
+begin showBits;
+  pushad();
+  stdout.put("%");
+  cmp(datatype, 1);
+  jne SHOWBITS_DATATYPE_ELSE_IF_;
+    mov(value, ebx);
+    mov((type int8 [ebx]), al);
+    mov(0, cl);
+    SHOWBITS_INT8_FOR_START_:
+    cmp(cl, 4);
+    jae SHOWBITS_INT8_FOR_END_;
+      shl(1, al);
+      jnc SHOWBITS_INT8_ELSE_;
+        stdout.put("1");
+        jmp SHOWBITS_INT8_END_;
+      SHOWBITS_INT8_ELSE_:
+        stdout.put("0");
+      SHOWBITS_INT8_END_:
+    inc(cl);
+    jmp SHOWBITS_INT8_FOR_START_;
+    SHOWBITS_INT8_FOR_END_:
+
+    stdout.put("_");
+    mov(0, cl);
+    SHOWBITS_INT8_LAST4_FOR_START_:
+    cmp(cl, 4);
+    jae SHOWBITS_INT8_LAST4_FOR_END_;
+      shl(1, al);
+      jnc SHOWBITS_INT8_LAST4_ELSE_;
+        stdout.put("1");
+        jmp SHOWBITS_INT8_LAST4_END_;
+      SHOWBITS_INT8_LAST4_ELSE_:
+        stdout.put("0");
+      SHOWBITS_INT8_LAST4_END_:
+    inc(cl);
+    jmp SHOWBITS_INT8_LAST4_FOR_START_;
+    SHOWBITS_INT8_LAST4_FOR_END_:
+    jmp SHOWBITS_DATATYPE_END_;
+  SHOWBITS_DATATYPE_ELSE_IF_:
+  cmp(datatype, 2);
+  jne SHOWBITS_DATATYPE_ELSE_;
+    mov(value, ebx);
+    mov((type int16 [ebx]), ax);
+    mov(0, dl);
+    SHOWBITS_FOR_INT16_OUTERLOOP_START_:
+    cmp(dl, 3);
+    jae SHOWBITS_INT16_OUTERLOOP_END_;
+      mov(0, cl);
+      SHOWBITS_FOR_INT16_INNERLOOP_START_:
+      cmp(cl, 4);
+      jae SHOWBITS_FOR_INT16_INNERLOOP_END_;
+        shl(1, ax);
+        jnc SHOWBITS_INT16_ELSE_;
+          stdout.put("1");
+          jmp SHOWBITS_INT16_END_;
+        SHOWBITS_INT16_ELSE_:
+          stdout.put("0");
+        SHOWBITS_INT16_END_:
+      inc(cl);
+      jmp SHOWBITS_FOR_INT16_INNERLOOP_START_;
+      SHOWBITS_FOR_INT16_INNERLOOP_END_:
+      stdout.put("_");
+    inc(dl);
+    jmp SHOWBITS_FOR_INT16_OUTERLOOP_START_;
+    SHOWBITS_INT16_OUTERLOOP_END_:
+    mov(0, cl);
+    SHOWBITS_FOR_INT16_LAST4_START_:
+    cmp(cl, 4);
+    jae SHOWBITS_DATATYPE_END_;
+      shl(1, ax);
+      jnc SHOWBITS_INT16_LAST4_ELSE_;
+        stdout.put("1");
+        jmp SHOWBITS_INT16_LAST4_END_;
+      SHOWBITS_INT16_LAST4_ELSE_:
+        stdout.put("0");
+      SHOWBITS_INT16_LAST4_END_:
+    inc(cl);
+    jmp SHOWBITS_FOR_INT16_LAST4_START_;
+    jmp SHOWBITS_DATATYPE_END_;
+  SHOWBITS_DATATYPE_ELSE_:
+    mov(value, ebx);
+    mov((type int32 [ebx]), eax);
+    mov(0, dl);
+    SHOWBITS_FOR_INT32_OUTERLOOP_START_:
+    cmp(dl, 7);
+    jae SHOWBITS_INT32_OUTERLOOP_END_;
+      mov(0, cl);
+      SHOWBITS_FOR_INT32_INNERLOOP_START_:
+      cmp(cl, 4);
+      jae SHOWBITS_FOR_INT32_INNERLOOP_END_;
+        shl(1, eax);
+        jnc SHOWBITS_INT32_ELSE_;
+          stdout.put("1");
+          jmp SHOWBITS_INT32_END_;
+        SHOWBITS_INT32_ELSE_:
+          stdout.put("0");
+        SHOWBITS_INT32_END_:
+      inc(cl);
+      jmp SHOWBITS_FOR_INT32_INNERLOOP_START_;
+      SHOWBITS_FOR_INT32_INNERLOOP_END_:
+      stdout.put("_");
+    inc(dl);
+    jmp SHOWBITS_FOR_INT32_OUTERLOOP_START_;
+    SHOWBITS_INT32_OUTERLOOP_END_:
+    mov(0, cl);
+    SHOWBITS_FOR_INT32_LAST4_START_:
+    cmp(cl, 4);
+    jae SHOWBITS_DATATYPE_END_;
+      shl(1, eax);
+      jnc SHOWBITS_INT32_LAST4_ELSE_;
+        stdout.put("1");
+        jmp SHOWBITS_INT32_LAST4_END_;
+      SHOWBITS_INT32_LAST4_ELSE_:
+        stdout.put("0");
+      SHOWBITS_INT32_LAST4_END_:
+    inc(cl);
+    jmp SHOWBITS_FOR_INT32_LAST4_START_;
+  SHOWBITS_DATATYPE_END_:
+  popad();
+end showBits;
+
+procedure getUns8(prompt:string; min:uns8; max:uns8);
+begin getUns8;
+  push(ebx);
+  push(ecx);
+  push(edx);
+  GETUNS8_FOREVER_START_:
+    try
+      stdout.put(nl, prompt);
+      stdin.flushInput();
+      stdin.getu8();
+      unprotected
+      cmp(al, min);
+      jl GETUNS8_ELSE_;
+      cmp(al, max);
+      jg GETUNS8_ELSE_;
+        jmp GETUNS8_FOREVER_END_;
+      GETUNS8_ELSE_:
+        stdout.put("Enter a value between ", min, " and ", max, ".", nl);
+    anyexception
+      stdout.put("Try again.", nl);
+    endtry;
+  jmp GETUNS8_FOREVER_START_;
+  GETUNS8_FOREVER_END_:
+  pop(edx);
+  pop(ecx);
+  pop(ebx);
+end getUns8;
+
+procedure getInt8(prompt:string; min:int8; max:int8);
+begin getInt8;
+  push(ebx);
+  push(ecx);
+  push(edx);
+  GETINT8_FOREVER_START_:
+    try
+      stdout.put(nl, prompt);
+      stdin.flushInput();
+      stdin.geti8();
+      unprotected
+      cmp((type int8 al), min);
+      jl GETINT8_ELSE_;
+      cmp((type int8 al), max);
+      jg GETINT8_ELSE_;
+        jmp GETINT8_FOREVER_END_;
+      GETINT8_ELSE_:
+        stdout.put("Enter a value between ", min, " and ", max, ".", nl);
+    anyexception
+      stdout.put("Try again.", nl);
+    endtry;
+  jmp GETINT8_FOREVER_START_;
+  GETINT8_FOREVER_END_:
+  pop(edx);
+  pop(ecx);
+  pop(ebx);
+end getInt8;
+
+procedure getInt16(prompt:string; min:int16; max:int16);
+begin getInt16;
+  push(ebx);
+  push(ecx);
+  push(edx);
+  GETINT16_FOREVER_START_:
+    try
+      stdout.put(nl, prompt);
+      stdin.flushInput();
+      stdin.geti16();
+      unprotected
+      cmp((type int16 ax), min);
+      jl GETINT16_ELSE_;
+      cmp((type int16 ax), max);
+      jg GETINT16_ELSE_;
+        jmp GETINT16_FOREVER_END_;
+      GETINT16_ELSE_:
+        stdout.put("Enter a value between ", min, " and ", max, ".", nl);
+    anyexception
+      stdout.put("Try again.", nl);
+    endtry;
+  jmp GETINT16_FOREVER_START_;
+  GETINT16_FOREVER_END_:
+  pop(edx);
+  pop(ecx);
+  pop(ebx);
+end getInt16;
+
+procedure getInt32(prompt:string; min:int32; max:int32);
+begin getInt32;
+  push(ebx);
+  push(ecx);
+  push(edx);
+  GETINT32_FOREVER_START_:
+    try
+      stdout.put(nl, prompt);
+      stdin.flushInput();
+      stdin.geti32();
+      unprotected
+      cmp((type int32 eax), min);
+      jl GETINT32_ELSE_;
+      cmp((type int32 eax), max);
+      jg GETINT32_ELSE_;
+        jmp GETINT32_FOREVER_END_;
+      GETINT32_ELSE_:
+        stdout.put("Enter a value between ", min, " and ", max, ".", nl);
+    anyexception
+      stdout.put("Try again.", nl);
+    endtry;
+  jmp GETINT32_FOREVER_START_;
+  GETINT32_FOREVER_END_:
+  pop(edx);
+  pop(ecx);
+  pop(ebx);
+end getInt32;
+
+procedure displayCells(address: dword; size: uns32; datatype: uns8; calctype: uns8; presentmode: uns8);
+begin displayCells;
+  pushad();
+  mov(address, edx);
+  mov(size, eax);
+  sub(1, eax);
+  stdout.newln();
+  cmp(presentmode, 1);
+  jne DC_PRE_2_;
+    mov(0, ecx);
+    DC_START_FOR_:
+    cmp(ecx, eax);
+    jae DC_END_FOR_;
+      stdout.put("index: ", (type uns32 ecx), " ");
+      cmp(datatype, 1);
+      jne DC_DT_ELSEIF_;
+        stdout.put("value: " , (type int8 [edx + ecx]), nl);
+        jmp DC_DT_END_;
+      DC_DT_ELSEIF_:
+      cmp(datatype, 2);
+      jne DC_DT_ELSE_;
+        stdout.put("value: " , (type int16 [edx + ecx * 2]), nl);
+        jmp DC_DT_END_;
+      DC_DT_ELSE_:
+        stdout.put("value: " , (type int32 [edx + ecx * 4]), nl);
+      DC_DT_END_:
+    inc(ecx);
+    jmp DC_START_FOR_;
+    DC_END_FOR_:
+    jmp DC_PRE_END_;
+  DC_PRE_2_:
+  cmp(presentmode, 2);
+  jne DC_PRE_ELSE_;
+    mov(0, ecx);
+    DC_LAST_FOR_START_:
+    cmp(ecx, eax);
+    jae DC_LAST_END_FOR_;
+      stdout.put("index: ", (type uns32 ecx), " ");
+      cmp(datatype, 1);
+      jne DC_LAST_ELSE_IF_;
+        stdout.put("value: ");
+        mov(edx, ebx);
+        add(ecx, ebx);
+        showBits(ebx, 1);
+        stdout.put(nl);
+        jmp DC_LAST_END_IF_;
+      DC_LAST_ELSE_IF_:
+      cmp(datatype, 2);
+      jne DC_LAST_ELSE_;
+        stdout.put("value: ");
+        mov(edx, ebx);
+        push(eax);
+        push(edx);
+        mov(ecx, eax);
+        mul(2, eax);
+        add(eax, ebx);
+        pop(edx);
+        pop(eax);
+        showBits(ebx, 2);
+        stdout.put(nl);
+        jmp DC_LAST_END_IF_;
+      DC_LAST_ELSE_:
+        stdout.put("value: ");
+        mov(edx, ebx);
+        push(eax);
+        push(edx);
+        mov(ecx, eax);
+        mul(4, eax);
+        add(eax, ebx);
+        pop(edx);
+        pop(eax);
+        showBits(ebx, 3);
+        stdout.put(nl);
+      DC_LAST_END_IF_:
+    inc(ecx);
+    jmp DC_LAST_FOR_START_;
+    DC_LAST_END_FOR_:
+    jmp DC_PRE_END_;
+  DC_PRE_ELSE_:
+    mov(0, ecx);
+    DC_PRE_3_START_:
+    cmp(ecx, eax);
+    jae DC_PRE_END_;
+      stdout.put("index: ", (type uns32 ecx), " ");
+      cmp(datatype, 1);
+      jne DC_PRE_DT_ELSEIF_;
+        mov((type int8 [edx + ecx]), bl);
+        stdout.put("value: " , bl, nl);
+        jmp DC_PRE_DT_END_;
+      DC_PRE_DT_ELSEIF_:
+      cmp(datatype, 2);
+      jne DC_PRE_DT_ELSE_;
+        mov((type int16 [edx + ecx * 2]), bx);
+        stdout.put("value: " , bx, nl);
+        jmp DC_PRE_DT_END_;
+      DC_PRE_DT_ELSE_:
+        mov((type int32 [edx + ecx * 4]), ebx);
+        stdout.put("value: " , ebx, nl);
+      DC_PRE_DT_END_:
+    inc(ecx);
+    jmp DC_PRE_3_START_;
+  DC_PRE_END_:
+
+  cmp(calctype, 1);
+  jne DC_CALC_ELSEIF_;
+    stdout.put("SUM: ");
+    computeSum(edx, eax, datatype);
+    jmp DC_CALC_END_;
+  DC_CALC_ELSEIF_:
+  cmp(calctype, 2);
+  jne DC_CALC_ELSEIF_2_;
+    stdout.put("AVERAGE: ");
+    computeAverage(edx, eax, datatype);
+    jmp DC_CALC_END_;
+  DC_CALC_ELSEIF_2_:
+  cmp(calctype, 3);
+  jne DC_CALC_ELSE_;
+    stdout.put("MINIMUM VALUE: ");
+    computeSmallest(edx, eax, datatype);
+    jmp DC_CALC_END_;
+  DC_CALC_ELSE_:
+    stdout.put("MAXIMUM VALUE: ");
+    mov(address, edx);
+    computeLargest(edx, eax, datatype);
+  DC_CALC_END_:
+  cmp(presentmode, 1);
+  jne DC_PRESENT_2_;
+    cmp(datatype, 1);
+    jne DC_DATA_2_;
+      stdout.put((type int8 [edx + eax]));
+      cmp(overflow_error, 1);
+      jne NO_OVERFLOW_ERROR_;
+      stdout.put(" [ERROR]");
+      mov(0, overflow_error);
+      jmp DC_END_;
+    DC_DATA_2_:
+    cmp(datatype, 2);
+    jne DC_DATA_ELSE_;
+      stdout.put((type int16 [edx + eax * 2]));
+      cmp(overflow_error, 1);
+      jne NO_OVERFLOW_ERROR_;
+      stdout.put(" [ERROR]");
+      mov(0, overflow_error);
+      jmp DC_END_;
+    DC_DATA_ELSE_:
+      stdout.put((type int32 [edx + eax * 4]));
+      cmp(overflow_error, 1);
+      jne NO_OVERFLOW_ERROR_;
+      stdout.put(" [ERROR]");
+      mov(0, overflow_error);
+    jmp DC_END_;
+  DC_PRESENT_2_:
+  cmp(presentmode, 2);
+  jne DC_PRESENT_ELSE_;
+    cmp(datatype, 1);
+    jne DC_1_;
+      mov(edx, ebx);
+      add(eax, ebx);
+      showBits(ebx, 1);
+      cmp(overflow_error, 1);
+      jne NO_OVERFLOW_ERROR_;
+      stdout.put(" [ERROR]");
+      mov(0, overflow_error);
+      jmp DC_END_;
+    DC_1_:
+    cmp(datatype, 2);
+    jne DC_2_;
+      mov(edx, ebx);
+      push(eax);
+      push(edx);
+      mul(2, eax);
+      add(eax, ebx);
+      pop(edx);
+      pop(eax);
+      showBits(ebx, 2);
+      cmp(overflow_error, 1);
+      jne NO_OVERFLOW_ERROR_;
+      stdout.put(" [ERROR]");
+      mov(0, overflow_error);
+      jmp DC_END_;
+    DC_2_:
+      mov(edx, ebx);
+      push(eax);
+      push(edx);
+      mul(4, eax);
+      add(eax, ebx);
+      pop(edx);
+      pop(eax);
+      showBits(ebx, 3);
+      cmp(overflow_error, 1);
+      jne NO_OVERFLOW_ERROR_;
+      stdout.put(" [ERROR]");
+      mov(0, overflow_error);
+      jmp DC_END_;
+  DC_PRESENT_ELSE_:
+    cmp(datatype, 1);
+    jne DC_ELSEIF_;
+      mov((type int8 [edx + eax]), bl);
+      stdout.put(bl);
+      cmp(overflow_error, 1);
+      jne NO_OVERFLOW_ERROR_;
+      stdout.put(" [ERROR]");
+      mov(0, overflow_error);
+      jmp DC_END_;
+    DC_ELSEIF_:
+    cmp(datatype, 2);
+    jne DC_ELSE_;
+      mov((type int16 [edx + eax * 2]), bx);
+      stdout.put(bx);
+      cmp(overflow_error, 1);
+      jne NO_OVERFLOW_ERROR_;
+      stdout.put(" [ERROR]");
+      mov(0, overflow_error);
+      jmp DC_END_;
+    DC_ELSE_:
+      mov((type int32 [edx + eax * 4]), ebx);
+      stdout.put(ebx);
+      cmp(overflow_error, 1);
+      jne NO_OVERFLOW_ERROR_;
+      stdout.put(" [ERROR]");
+      mov(0, overflow_error);
+    DC_END_:
+  NO_OVERFLOW_ERROR_:
+  stdout.newln();
+  stdout.newln();
+  popad();
+end displayCells;
+
+procedure editCell(address: dword; index: uns32; datatype: uns8);
+begin editCell;
+  pushad();
+  mov(address, ebx);
+  mov(index, ecx);
+  cmp(datatype, 1);
+  jne EDITCELL_ELSEIF_;
+    getInt8("Enter a new int8 value: ", -128, 127);
+    mov(al, (type int8 [ebx + ecx]));
+    jmp EDITCELL_END_;
+  EDITCELL_ELSEIF_:
+  cmp(datatype, 2);
+  jne EDITCELL_ELSE_;
+    getInt16("Enter a new int16 value: ", -32768, 32767);
+    mov(ax, (type int16 [ebx + ecx * 2]));
+    jmp EDITCELL_END_;
+  EDITCELL_ELSE_:
+    getInt32("Enter a new int32 value: ", -200000, 200000);
+    mov(eax,(type int32 [ebx + ecx * 4]));
+  EDITCELL_END_:
+  popad();
+end editCell;
+
+procedure computeSum(address: dword; size: uns32; mtype: uns8);
+begin computeSum;
+  pushad();
+  mov(address, ebx);
+  mov(0, edx);
+  mov(0, ecx);
+  COMPUTESUM_STARTFOR_:
+  cmp(ecx, size);
+  jae COMPUTESUM_ENDFOR_;
+    cmp(mtype, 1);
+    jne COMPUTESUM_ELSEIF_;
+			add((type int8 [ebx + ecx * 1]), dl);
+      jno COMPUTESUM_ENDIF_;
+      mov(1, overflow_error);
+      jmp COMPUTESUM_ENDIF_;
+    COMPUTESUM_ELSEIF_:
+    cmp(mtype, 2);
+    jne COMPUTESUM_ELSE_;
+		  add((type int16 [ebx + ecx * 2]), dx);
+      jno COMPUTESUM_ENDIF_;
+      mov(1, overflow_error);
+      jmp COMPUTESUM_ENDIF_;
+		COMPUTESUM_ELSE_:
+			add((type int32 [ebx + ecx * 4]), edx);
+      jno COMPUTESUM_ENDIF_;
+      mov(1, overflow_error);
+		COMPUTESUM_ENDIF_:
+   inc(ecx);
+   jmp COMPUTESUM_STARTFOR_;
+  COMPUTESUM_ENDFOR_:
+
+  cmp(mtype, 1);
+  jne COMPUTESUM_MTYPE_ELSEIF_;
+		mov(dl, (type int8 [ebx + ecx * 1]));
+    jmp COMPUTESUM_MTYPE_END_;
+  COMPUTESUM_MTYPE_ELSEIF_:
+  cmp(mtype, 2);
+  jne COMPUTESUM_MTYPE_ELSE_;
+		mov(dx, (type int16 [ebx + ecx * 2]));
+    jmp COMPUTESUM_MTYPE_END_;
+	COMPUTESUM_MTYPE_ELSE_:
+		mov(edx, (type int32 [ebx + ecx * 4]));
+	COMPUTESUM_MTYPE_END_:
+  popad();
+end computeSum;
+
+procedure computeAverage(address: dword; size: uns32; mtype: uns8);
+begin computeAverage;
+  pushad();
+  mov(address, ebx);
+  mov(size, ecx);
+  computeSum(ebx, ecx, mtype);
+  cmp(mtype, 1);
+  jne COMPUTE_AVERAGE_ELSEIF_;
+    mov((type int8 [ebx + ecx * 1]), al);
+    mov(0, ah);
+    idiv(cl, ax);
+    mov(al, (type int8 [ebx + ecx * 1]));
+    jmp COMPUTE_AVERAGE_END_;
+  COMPUTE_AVERAGE_ELSEIF_:
+  cmp(mtype, 2);
+  jne COMPUTE_AVERAGE_ELSE_;
+    mov((type int16 [ebx + ecx * 2]), ax);
+    mov(0, dx);
+    idiv(cx, dx:ax);
+    mov(ax, (type int16 [ebx + ecx * 2]));
+    jmp COMPUTE_AVERAGE_END_;
+	COMPUTE_AVERAGE_ELSE_:
+    mov((type int32 [ebx + ecx * 4]), eax);
+    mov(0, edx);
+    idiv(ecx, edx:eax);
+    mov(eax, (type int32 [ebx + ecx * 4]));
+	COMPUTE_AVERAGE_END_:
+  popad();
+end computeAverage;
+
+procedure computeLargest(address: dword; size: uns32; mtype: uns8);
+begin computeLargest;
+  pushad();
+  mov(address, ebx);
+
+	// assume the first element is the largest
+	mov(0, edx);
+  cmp(mtype, 1);
+  jne LARGEST_ELSE_IF_;
+		mov((type int8 [ebx]), dl);
+    jmp LARGEST_ELSE_END_;
+  LARGEST_ELSE_IF_:
+  cmp(mtype, 2);
+  jne LARGEST_ELSE_;
+		mov((type int16 [ebx]), dx);
+    jmp LARGEST_ELSE_END_;
+	LARGEST_ELSE_:
+		mov((type int32 [ebx]), edx);
+	LARGEST_ELSE_END_:
+
+	// look through the remaining elements to see if any is bigger
+	mov(1, ecx);
+  LARGEST_STARTFOR_:
+  cmp(ecx, size);
+  jae LARGEST_ENDFOR_;
+    cmp(mtype, 1);
+    jne LARGEST_ELSEIF_1_;
+			cmp((type int8 [ebx + ecx * 1]), dl);
+      jb LARGEST_INT8_END_;
+				mov((type int8 [ebx + ecx * 1]), dl);
+			LARGEST_INT8_END_:
+      jmp LARGEST_ENDIF_1_;
+    LARGEST_ELSEIF_1_:
+    cmp(mtype, 2);
+    jne LARGEST_ELSE_1_;
+			cmp((type int16 [ebx + ecx * 2]), dx);
+      jb LARGEST_INT16_END_;
+				mov((type int16 [ebx + ecx * 2]), dx);
+			LARGEST_INT16_END_:
+      jmp LARGEST_ENDIF_1_;
+    LARGEST_ELSE_1_:
+			cmp((type int32 [ebx + ecx * 4]), edx);
+      jb LARGEST_INT32_END_;
+				mov((type int32 [ebx + ecx * 4]), edx);
+			LARGEST_INT32_END_:
+		LARGEST_ENDIF_1_:
+  inc(ecx);
+  jmp LARGEST_STARTFOR_;
+  LARGEST_ENDFOR_:
+
+	// write largest value into "secret/compute" cell
+  cmp(mtype, 1);
+  jne LARGEST_ELSE_IF_2_;
+		mov(dl, (type int8 [ebx + ecx * 1]));
+    jmp LARGEST_ELSE_END_2_;
+  LARGEST_ELSE_IF_2_:
+  cmp(mtype, 2);
+  jne LARGEST_ELSE_2_;
+		mov(dx, (type int16 [ebx + ecx * 2]));
+    jmp LARGEST_ELSE_END_2_;
+  LARGEST_ELSE_2_:
+		mov(edx, (type int32 [ebx + ecx * 4]));
+	LARGEST_ELSE_END_2_:
+  popad();
+end computeLargest;
+
+procedure computeSmallest(address: dword; size: uns32; mtype: uns8);
+begin computeSmallest;
+  pushad();
+  mov(address, ebx);
+
+	// assume the first element is the smallest
+	mov(0, edx);
+  cmp(mtype, 1);
+  jne SMALLEST_ELSE_IF_;
+		mov((type int8 [ebx]), dl);
+    jmp SMALLEST_ELSE_END_1_;
+  SMALLEST_ELSE_IF_:
+  cmp(mtype, 2);
+  jne SMALLEST_ELSE_;
+		mov((type int16 [ebx]), dx);
+    jmp SMALLEST_ELSE_END_1_;
+	SMALLEST_ELSE_:
+		mov((type int32 [ebx]), edx);
+    jmp SMALLEST_ELSE_END_1_;
+	SMALLEST_ELSE_END_1_:
+
+	// look through the remaining elements to see if any is smaller
+  mov(1, ecx);
+  BEGIN_SMALLEST_FOR_:
+  cmp(ecx, size);
+  jae END_SMALLEST_FOR_;
+    cmp(mtype, 1);
+    jne SMALLEST_2_ELSE_IF_2_;
+			cmp((type int8 [ebx + ecx * 1]), dl);
+      jae SMALLEST_2_ELSE_END_;
+				mov((type int8 [ebx + ecx * 1]), dl);
+    jmp SMALLEST_2_ELSE_END_;
+    SMALLEST_2_ELSE_IF_2_:
+    cmp(mtype, 2);
+    jne SMALLEST_2_ELSE_3_;
+			cmp((type int16 [ebx + ecx * 2]), dx);
+      jae SMALLEST_2_ELSE_END_;
+				mov((type int16 [ebx + ecx * 2]), dx);
+    jmp SMALLEST_2_ELSE_END_;
+		SMALLEST_2_ELSE_3_:
+			cmp((type int32 [ebx + ecx * 4]), edx);
+      jae SMALLEST_2_ELSE_END_;
+				mov((type int32 [ebx + ecx * 4]), edx);
+		SMALLEST_2_ELSE_END_:
+	inc(ecx);
+  jmp BEGIN_SMALLEST_FOR_;
+  END_SMALLEST_FOR_:
+	// write smallest value into "secret/compute" cell
+
+  cmp(mtype, 1);
+  jne SMALLEST_ELSE_IF_2_;
+		mov(dl, (type int8 [ebx + ecx * 1]));
+    jmp SMALLEST_ELSE_END_;
+  SMALLEST_ELSE_IF_2_:
+  cmp(mtype, 2);
+  jne SMALLEST_ELSE_3_;
+		mov(dx, (type int16 [ebx + ecx * 2]));
+    jmp SMALLEST_ELSE_END_;
+  SMALLEST_ELSE_3_:
+		mov(edx, (type int32 [ebx + ecx * 4]));
+	SMALLEST_ELSE_END_:
+  popad();
+end computeSmallest;
+
+begin ProgrammingProject2;
+
+// program instructions
+  START_FOREVER_LOOP_:
+    console.cls();
+    mov(0, eax);
+    getUns8("Enter number of cells desired (2-10): ", 2, 10);
+    add(1, al);
+    mov(0, ebx);
+    mov(al, bl);
+    push(eax);
+    stdout.put(nl, "Select desired data type ", nl);
+    stdout.put("[1] int8", nl);
+    stdout.put("[2] int16", nl);
+    stdout.put("[3] int32", nl, nl);
+    getUns8("your choice (1-3): ", 1, 3);
+    mov(al, cl);
+    pop(eax);
+    stdout.put(nl);
+    cmp(cl, 1);
+    jne MAIN_ELSEIF_;
+      mul(@size(int8), eax);
+      stdout.put((type uns32 eax), " bytes allocated!", nl);
+      mem.zalloc(eax);
+      jmp MAIN_IF_END_;
+    MAIN_ELSEIF_:
+    cmp(cl, 2);
+    jne MAIN_IF_ELSE_;
+      mul(@size(int16), eax);
+      stdout.put((type uns32 eax), " bytes allocated!", nl);
+      mem.zalloc(eax);
+      jmp MAIN_IF_END_;
+    MAIN_IF_ELSE_:
+      mul(@size(int32), eax);
+      stdout.put((type uns32 eax), " bytes allocated!", nl);
+      mem.zalloc(eax);
+    MAIN_IF_END_:
+    stdout.put(nl, "Press ENTER to continue");
+    stdin.flushInput();
+    stdin.readLn();
+    console.cls();
+
+    mov(eax, cells);
+    mov(1, present);
+    mov(1, dl);
+    displayCells(cells, ebx, cl, dl, present);
+    INTERIOR_FOREVER_LOOP_:
+      stdout.put(nl, "[1] Edit a cell");
+      stdout.put(nl, "[2] Change calculation");
+      stdout.put(nl, "[3] Change presentation");
+      stdout.put(nl, "[4] Reset and start over");
+      stdout.put(nl, "[0] Exit program", nl, nl);
+      getUns8("your choice (0-4):", 0, 4);
+      cmp(al, 1);
+      jne MENU_ELSE_IF_2_;
+        stdout.put(nl);
+        push(ebx);
+        sub(2, bl);
+        getUns8("Please enter the index of the cell you wish to edit: ", 0, bl);
+        pop(ebx);
+        editCell(cells, eax, cl);
+        jmp MENU_ELSE_END_;
+      MENU_ELSE_IF_2_:
+      cmp(al, 2);
+      jne MENU_ELSE_IF_3_;
+        console.cls();
+        stdout.put("Current calculation -->");
+        cmp(dl, 1);
+        jne CALC_ELSEIF_1_;
+          stdout.put("SUM");
+          jmp CALC_END_;
+        CALC_ELSEIF_1_:
+        cmp(dl, 2);
+        jne CALC_ELSEIF_2_;
+          stdout.put("AVERAGE");
+          jmp CALC_END_;
+        CALC_ELSEIF_2_:
+        cmp(dl, 3);
+        jne CALC_ELSE_;
+          stdout.put("MINIMUM VALUE");
+          jmp CALC_END_;
+        CALC_ELSE_:
+          stdout.put("MAXIMUM VALUE");
+        CALC_END_:
+        stdout.put(nl, nl, "[1] Change to SUM");
+        stdout.put(nl, "[2] Change to AVERAGE");
+        stdout.put(nl, "[3] Change to MINIMUM VALUE");
+        stdout.put(nl, "[4] Change to MAXIMUM VALUE");
+        getUns8("your choice (1-4): ", 1, 4);
+        cmp(al, 1);
+        jne CHANGE_CALC_ELSEIF_1_;
+          mov(1, dl);
+          jmp CHANGE_CALC_END_;
+        CHANGE_CALC_ELSEIF_1_:
+        cmp(al, 2);
+        jne CHANGE_CALC_ELSEIF_2_;
+          mov(2, dl);
+          jmp CHANGE_CALC_END_;
+        CHANGE_CALC_ELSEIF_2_:
+        cmp(al, 3);
+        jne CHANGE_CALC_ELSE_;
+          mov(3, dl);
+          jmp CHANGE_CALC_END_;
+        CHANGE_CALC_ELSE_:
+          mov(4, dl);
+        CHANGE_CALC_END_:
+        jmp MENU_ELSE_END_;
+      MENU_ELSE_IF_3_:
+      cmp(al, 3);
+      jne MENU_ELSE_IF_4_;
+        console.cls();
+        stdout.put("Current presentation mode -->");
+        cmp(present, 1);
+        jne PRESENTATIONMODE_ELSEIF_;
+          stdout.put("DECIMAL");
+          jmp PRESENTATIONMODE_END_;
+        PRESENTATIONMODE_ELSEIF_:
+        cmp(present, 2);
+        jne PRESENTATIONMODE_ELSE_;
+          stdout.put("BINARY");
+          jmp PRESENTATIONMODE_END_;
+        PRESENTATIONMODE_ELSE_:
+          stdout.put("HEXADECIMAL");
+        PRESENTATIONMODE_END_:
+        stdout.put(nl, nl, "[1] Change to DECIMAL");
+        stdout.put(nl, "[2] Change to BINARY");
+        stdout.put(nl, "[3] Change to HEXADECIMAL");
+        getUns8("your choice (1-3): ", 1, 3);
+        cmp(al, 1);
+        jne CHANGE_PRESENTATIONMODE_ELSEIF_;
+          mov(1, present);
+          jmp CHANGE_PRESENTATIONMODE_END_;
+        CHANGE_PRESENTATIONMODE_ELSEIF_:
+        cmp(al, 2);
+        jne CHANGE_PRESENTATIONMODE_ELSE_;
+          mov(2, present);
+          jmp CHANGE_PRESENTATIONMODE_END_;
+        CHANGE_PRESENTATIONMODE_ELSE_:
+          mov(3, present);
+        CHANGE_PRESENTATIONMODE_END_:
+        jmp MENU_ELSE_END_;
+      MENU_ELSE_IF_4_:
+      cmp(al, 4);
+      jne MENU_ELSE_;
+        mem.free(cells);
+        stdout.put(nl, "Memory has been freed!");
+        stdout.put(nl, "Press ENTER to continue");
+        stdin.flushInput();
+        stdin.readLn();
+        jmp START_FOREVER_LOOP_;
+      MENU_ELSE_:
+        jmp ProgramEnd;
+      MENU_ELSE_END_:
+      stdout.put(nl, "Press ENTER to continue");
+      stdin.flushInput();
+      stdin.readLn();
+      console.cls();
+      displayCells(cells, ebx, cl, dl, present);
+    jmp INTERIOR_FOREVER_LOOP_;
+  jmp START_FOREVER_LOOP_;
+  ProgramEnd:
+end ProgrammingProject2;

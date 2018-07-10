@@ -1,0 +1,321 @@
+/*
+ * Programming Project 1
+ *
+ * written by			Derek Critchfield
+ * created on			 13 September 2017
+ * last modified on		4 October 2017
+ *
+ * This program is a simulated vending maching that takes credits worth one penny.
+ * It allows the user to purchase as many items as they wish as long as it is in
+ * stock and calculates there change. If a user purchases an item they are given
+ * the opportunity to purchase more items with their change or to quit and collect
+ * their change and return a reciept.
+ *
+ */
+program Vending;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+static
+  gumball_price: uns16;
+  ipod_price: uns16;
+  checkers_price: uns16;
+  poptart_price: uns16;
+  snickers_price: uns16;
+  cheese_price: uns16;
+
+  gumball_qty: uns8;
+  ipod_qty: uns8;
+  checkers_qty: uns8;
+  poptart_qty: uns8;
+  snickers_qty: uns8;
+  cheese_qty: uns8;
+
+  selection: uns16;
+  selection_string: string;
+  change: uns16;
+  total: uns16;
+
+// procedure forward declarations
+// prompts user and collects their credits
+procedure getUns16(prompt:string; min:uns16; max:uns16); @forward;
+// loads the machine
+procedure loadMachine; @forward;
+// displays the contents of the vending machine
+procedure displayItems; @forward;
+// allows user to make a selection from the machine
+procedure makeSelection; @forward;
+// handles the users selection and calls processPayment
+procedure handleSelection; @forward;
+// Shows the user the change due in dollars, quarters, dimes, nickels, and pennies
+procedure showChange; @forward;
+// processes users payments and is called from handleSelection
+procedure processPayment; @forward;
+// generates and consoles the users reciept
+procedure returnReciept; @forward;
+
+// procedure definitions
+procedure getUns16(prompt:string; min:uns16; max:uns16);
+begin getUns16;
+  forever;
+    try
+      stdout.put(nl, prompt);
+      stdin.flushInput();
+      stdin.getu16();
+      unprotected
+      if (ax >= min && ax <= max) then
+        break;
+      else
+        stdout.put("Enter a value between ", min, " and ", max, ".", nl);
+      endif;
+    anyexception
+      stdout.put("Try again.", nl);
+    endtry;
+  endfor;
+end getUns16;
+
+procedure loadMachine;
+begin loadMachine;
+  mov(10, gumball_qty);
+  mov(10, ipod_qty);
+  mov(10, checkers_qty);
+  mov(10, poptart_qty);
+  mov(10, snickers_qty);
+  mov(10, cheese_qty);
+
+  mov(5, gumball_price);
+  mov(5000, ipod_price);
+  mov(200, checkers_price);
+  mov(150, poptart_price);
+  mov(99, snickers_price);
+  mov(50, cheese_price);
+
+  mov(0, change);
+end loadMachine;
+
+procedure displayItems;
+begin displayItems;
+  stdout.put(nl, "The Vending Machine", nl);
+  stdout.put("1) gumball: ", gumball_qty, " in stock at ", gumball_price, " credits.",nl);
+  stdout.put("2) ipod: ", ipod_qty, " in stock at ", ipod_price, " credits.",nl);
+  stdout.put("3) checkers: ", checkers_qty, " in stock at ", checkers_price, " credits.",nl);
+  stdout.put("4) poptart: ", poptart_qty, " in stock at ", poptart_price, " credits.",nl);
+  stdout.put("5) snickers: ", snickers_qty, " in stock at ", snickers_price, " credits.",nl);
+  stdout.put("6) cheese: ", cheese_qty, " in stock at ", cheese_price, " credits.",nl);
+end displayItems;
+
+procedure makeSelection;
+begin makeSelection;
+  forever;
+    getUns16("What item would you like to purchase today: ", 1, 6);
+    if (ax == 1 && gumball_qty == 0) then
+      stdout.put(nl, "Sorry we are sold out of gumballs!", nl);
+      stdout.put("Please select a different item.", nl);
+    elseif (ax == 2 && ipod_qty == 0) then
+      stdout.put(nl, "Sorry we are sold out of ipods!", nl);
+      stdout.put("Please select a different item.", nl);
+    elseif (ax == 3 && checkers_qty == 0) then
+      stdout.put(nl, "Sorry we are sold out of checkers!", nl);
+      stdout.put("Please select a different item.", nl);
+    elseif (ax == 4 && poptart_qty == 0) then
+      stdout.put(nl, "Sorry we are sold out of poptarts!", nl);
+      stdout.put("Please select a different item.", nl);
+    elseif (ax == 5 && snickers_qty == 0) then
+      stdout.put(nl, "Sorry we are sold out of snickers!", nl);
+      stdout.put("Please select a different item.", nl);
+    elseif (ax == 6 && ipod_qty == 0) then
+      stdout.put(nl, "Sorry we are sold out of cheese!", nl);
+      stdout.put("Please select a different item.", nl);
+    else
+      mov(ax, selection);
+      break;
+    endif;
+  endfor;
+end makeSelection;
+
+procedure handleSelection;
+begin handleSelection;
+  mov(selection, ax);
+  if (ax == 1) then
+    stdout.put("A gumball costs ", gumball_price, " credits.",nl);
+    mov(gumball_price, bx);
+    processPayment();
+    dec(gumball_qty);
+
+  elseif (ax == 2) then
+    stdout.put("An ipod costs ", ipod_price, " credits.",nl);
+    mov(ipod_price, bx);
+    processPayment();
+    dec(ipod_qty);
+
+  elseif (ax == 3) then
+    stdout.put("Checkers costs ", checkers_price, " credits.",nl);
+    mov(checkers_price, bx);
+    processPayment();
+    dec(checkers_qty);
+
+  elseif (ax == 4) then
+    stdout.put("A poptart costs ", poptart_price, " credits.",nl);
+    mov(poptart_price, bx);
+    processPayment();
+    dec(poptart_qty);
+
+  elseif (ax == 5) then
+    stdout.put("Snickers costs ", snickers_price, " credits.",nl);
+    mov(snickers_price, bx);
+    processPayment();
+    dec(snickers_qty);
+
+  else
+    stdout.put("Cheese costs ", cheese_price, " credits.",nl);
+    mov(cheese_price, bx);
+    processPayment();
+    dec(cheese_qty);
+  endif;
+  stdin.flushInput();
+end handleSelection;
+
+procedure processPayment;
+begin processPayment;
+  repeat
+    if (change < bx) then
+      sub(change, bx);
+      stdout.put("You still owe ", (type uns16 bx), " credits.",nl);
+      mov(0, change);
+      getUns16("Pleae enter more credits now (up to 20000): ", 0, 20000);
+      add(ax, change);
+    else
+      sub(bx, change);
+      mov(0, bx);
+    endif;
+  until (bx == 0);
+end processPayment;
+
+procedure showChange;
+var
+  dollars: uns16;
+  quarters: uns16;
+  dimes: uns16;
+  nickels: uns16;
+  pennies: uns16;
+
+begin showChange;
+  mov(change, ax);
+  mov(0,dx);
+  div(100, dx:ax);
+  mov(ax, dollars);
+  mov(dx, ax);
+  mov(0, dx);
+  div(25, dx:ax);
+  mov(ax, quarters);
+  mov(dx, ax);
+  mov(0, dx);
+  div(10, dx:ax);
+  mov(ax, dimes);
+  mov(dx, ax);
+  mov(0, dx);
+  div(5, dx:ax);
+  mov(ax, nickels);
+  mov(dx, pennies);
+  stdout.put(nl, "You are due ", change, " credits!", nl,nl);
+  stdout.put("Which is: ", nl, dollars, " dollar(s)", nl);
+  stdout.put(quarters, " quarter(s)", nl);
+  stdout.put(dimes, " dime(s)", nl);
+  stdout.put(nickels, " nickel(s)", nl);
+  stdout.put(pennies, " pennies", nl);
+
+end showChange;
+
+procedure returnReciept;
+begin returnReciept;
+  mov(0, total);
+  mov(total, cx);
+  stdout.put(nl, "Thank you for shopping at The Vending Machine!", nl);
+  stdout.put(nl, "RECIEPT", nl);
+  stdout.put("_____________________", nl);
+  if (gumball_qty != 10) then
+    mov(10, bl);
+    sub(gumball_qty, bl);
+    stdout.put((type uns8 bl), " gumball(s)     ");
+    mov(gumball_price, ax);
+    mov(0, bh);
+    mul(bx, ax);
+    stdout.put("at ", (type uns16 ax), " credits", nl);
+    add(ax, cx);
+  endif;
+  if (ipod_qty != 10) then
+    mov(10, bl);
+    sub(ipod_qty, bl);
+    stdout.put((type uns8 bl), " ipod(s)        ");
+    mov(ipod_price, ax);
+    mov(0, bh);
+    mul(bx, ax);
+    stdout.put("at ", (type uns16 ax), " credits",nl);
+    add(ax, cx);
+  endif;
+  if (checkers_qty != 10) then
+    mov(10, bl);
+    sub(checkers_qty, bl);
+    stdout.put((type uns8 bl), " checker(s)     ");
+    mov(checkers_price, ax);
+    mov(0, bh);
+    mul(bx, ax);
+    stdout.put("at ", (type uns16 ax), " credits",nl);
+    add(ax, cx);
+  endif;
+  if (poptart_qty != 10) then
+    mov(10, bl);
+    sub(poptart_qty, bl);
+    stdout.put((type uns8 bl), " poptart(s)     ");
+    mov(poptart_price, ax);
+    mov(0, bh);
+    mul(bx, ax);
+    stdout.put("at ", (type uns16 ax), " credits",nl);
+    add(ax, cx);
+  endif;
+  if (snickers_qty != 10) then
+    mov(10, bl);
+    sub(snickers_qty, bl);
+    stdout.put((type uns8 bl), " snicker(s)     ");
+    mov(snickers_price, ax);
+    mov(0, bh);
+    mul(bx, ax);
+    stdout.put("at ", (type uns16 ax), " credits",nl);
+    add(ax, cx);
+  endif;
+  if (cheese_qty != 10) then
+    mov(10, bl);
+    sub(cheese_qty, bl);
+    stdout.put((type uns8 bl), " cheese         ");
+    mov(cheese_price, ax);
+    mov(0, bh);
+    mul(bx, ax);
+    stdout.put("at ", (type uns16 ax), " credits",nl);
+    add(ax, cx);
+  endif;
+  mov(cx, total);
+  stdout.put(nl, "TOTAL             ", total, " credits", nl);
+  stdout.put(nl,"GOODBYE!", nl,nl);
+end returnReciept;
+
+begin Vending;
+
+// program instructions
+  loadMachine();
+  forever
+    displayItems();
+    makeSelection();
+    handleSelection();
+    showChange();
+
+    stdout.put(nl, "Would you like to purchase another item (Y/N):");
+    stdin.getc();
+    if (al == 'N' || al == 'n') then
+      returnReciept();
+      break;
+    endif;
+    stdin.flushInput();
+  endfor;
+end Vending;

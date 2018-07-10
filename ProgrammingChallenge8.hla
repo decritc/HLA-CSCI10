@@ -1,0 +1,128 @@
+/*
+ * HLA Programming Challenge 8
+ *
+ * written by			Derek Critchfield
+ * created on			18 October 2017
+ * last modified on		18 October 2017
+ *
+ * Two part program that demonstrates shifts and rotates.
+ *
+ */
+program ProgrammingChallenge8;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+
+// procedure forward declarations
+procedure getUns8(prompt:string; min:uns8; max:uns8); @forward;
+procedure showBits(value:byte); @forward;
+
+// procedure definitions
+procedure getUns8(prompt:string; min:uns8; max:uns8);
+begin getUns8;
+  push(ebx);
+  forever;
+    try
+      stdout.put(nl, prompt);
+      stdin.flushInput();
+      stdin.getu8();
+      unprotected
+      if (al >= min && al <= max) then
+        break;
+      else
+        stdout.put("Enter a value between ", min, " and ", max, ".", nl);
+      endif;
+    anyexception
+      stdout.put("Try again.", nl);
+    endtry;
+  endfor;
+  pop(ebx);
+end getUns8;
+
+procedure showBits(value:byte);
+begin showBits;
+  push(eax);
+  push(ecx);
+  stdout.put("%");
+  mov(value, al);
+  for (mov(0, cl); cl<4; inc(cl)) do
+    shl(1, al);
+    if (@c) then
+      stdout.put("1");
+    else
+      stdout.put("0");
+    endif;
+  endfor;
+  stdout.put("_");
+  for (mov(0, cl); cl<4; inc(cl)) do
+    shl(1, al);
+    if (@c) then
+      stdout.put("1");
+    else
+      stdout.put("0");
+    endif;
+  endfor;
+  stdout.newln();
+  pop(ecx);
+  pop(eax);
+end showBits;
+
+begin ProgrammingChallenge8;
+
+// program instructions
+  forever
+    stdout.put(nl, "PART ONE: ror,rol,shr,shl", nl);
+    getUns8("Please enter a value between [0-255]: ", 0, 255);
+    stdout.put("input [decimal]: ", (type uns8 al), nl);
+    stdout.put("input [binary]: ");
+    showBits(al);
+    mov(al, bl);
+    ror(1, bl);
+    stdout.put("rotate right one [decimal]: ", (type uns8 bl), nl);
+    stdout.put("rotate right one [binary]: ");
+    showBits(bl);
+    mov(al,bl);
+    rol(1, bl);
+    stdout.put("rotate left one [decimal]: ", (type uns8 bl), nl);
+    stdout.put("rotate left one [binary]: ");
+    showBits(bl);
+    mov(al,bl);
+    shr(1, bl);
+    stdout.put("shift right one [decimal]: ", (type uns8 bl), nl);
+    stdout.put("shift right one [binary]: ");
+    showBits(bl);
+    mov(al,bl);
+    shl(1, bl);
+    stdout.put("shift left one [decimal]: ", (type uns8 bl), nl);
+    stdout.put("shift left one [binary]: ");
+    showBits(bl);
+
+    stdout.put(nl, "PART TWO: add", nl);
+    getUns8("Please enter the first number between [0-255]: ", 0 , 255);
+    stdout.put("first input [decimal]: ", (type uns8 al), nl);
+    stdout.put("first input [binary]: ");
+    showBits(al);
+    mov(al, bl);
+    stdin.flushInput();
+    getUns8("Please enter the second number between [0-255]: ", 0 , 255);
+    stdout.put("second input [decimal]: ", (type uns8 al), nl);
+    stdout.put("second input [binary]: ");
+    showBits(al);
+    mov(0, ah);
+    add(bl, al);
+    if (@c) then
+      stdout.put(nl, "CARRY BIT SET/OVERFLOW", nl);
+    endif;
+    stdout.put(nl,"sum [decimal]: ", (type uns8 al), nl);
+    stdout.put("sum [binary]: ");
+    showBits(al);
+    stdin.flushInput();
+    stdout.put(nl, "Would you like run the program again (Y/N):");
+    stdin.getc();
+    breakif(al == 'N' || al == 'n');
+    stdin.flushInput();
+  endfor;
+
+end ProgrammingChallenge8;

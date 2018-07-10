@@ -1,0 +1,28 @@
+/*
+ * HLA Starter
+ *
+ * written by			Derek Critchfield
+ * created on			10 August 2017
+ * last modified on		10 August 2017
+ *
+ * This program is provided as an example of source code documentation
+ * for CSCI 10 at Butte College. A brief description should be provided
+ * for each program you implement in this course.
+ *
+ */
+program Starter;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+
+// procedure forward declarations
+
+// procedure definitions
+
+begin Starter;
+
+// program instructions
+
+end Starter;

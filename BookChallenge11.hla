@@ -1,0 +1,125 @@
+/* STARTER CODE FOR BOOK CHALLENGE #11 */
+program BookChallengeEleven;
+
+#include ("stdlib.hhf")
+
+procedure printArrayData(baseAddress: dword; maxIndex: uns32; dataType: uns8); @forward;
+procedure enterUserValueIntoArray(baseAddress: dword; maxIndex: uns32; dataType: uns8); @forward;
+
+procedure printArrayData(baseAddress: dword; maxIndex: uns32; dataType: uns8);
+begin printArrayData;
+
+	pushad();
+
+	mov(baseAddress, ebx);
+	for (mov(0, ecx); ecx <= maxIndex; inc(ecx)) do
+		if (dataType == 0) then // uns8
+			stdout.put((type uns8 [ebx + ecx]));
+		elseif (dataType == 1) then // uns16
+			stdout.put((type uns16 [ebx + ecx *2]));
+
+		elseif (dataType == 2) then // uns32
+			stdout.put((type uns32 [ebx + ecx * 4]));
+		elseif (dataType == 3) then // int8
+			stdout.put((type int8 [ebx + ecx]));
+
+		elseif (dataType == 4) then // int16
+			stdout.put((type int16 [ebx + ecx * 2]));
+		elseif (dataType == 5) then // int32
+			stdout.put((type int32 [ebx + ecx * 4]));
+
+		endif;
+		stdout.put(" ");
+	endfor;
+
+	popad();
+
+end printArrayData;
+
+procedure enterUserValueIntoArray(baseAddress: dword; maxIndex: uns32; dataType: uns8);
+begin enterUserValueIntoArray;
+
+	pushad();
+
+	stdout.put("Enter index of item in array to input (0-", maxIndex, "): ");
+	mov(stdin.getu32(), ecx);
+
+	mov(baseAddress, ebx);
+
+	forever
+		try
+			push(ebx);
+			push(ecx);
+			stdout.put("Enter a new value: ");
+			if (dataType == 0) then // uns8
+				stdin.getu8();
+				mov(al, [ebx + ecx]);
+			elseif (dataType == 1) then // uns16
+				stdin.getu16();
+				mov(ax, [ebx + ecx * 2]);
+			elseif (dataType == 2) then // uns32
+				stdin.getu32();
+				mov(eax, [ebx + ecx * 4]);
+			elseif (dataType == 3) then // int8
+				stdin.geti8();
+				mov(al, [ebx + ecx]);
+			elseif (dataType == 4) then // int16
+				stdin.geti16();
+				mov(ax, [ebx + ecx * 2]);
+			elseif (dataType == 5) then // int32
+				stdin.geti32();
+				mov(eax, [ebx + ecx * 4]);
+
+			endif;
+			unprotected
+				break;
+		anyexception
+			stdout.put("Invalid entry.", nl, nl);
+		endtry;
+		pop(ecx);
+		pop(ebx);
+	endfor;
+
+	popad();
+
+end enterUserValueIntoArray;
+
+static
+	mybools:		boolean[5]	:= [false, true, false, true, false];
+	myint16s:	int16[5]		:= [-1000, -100, 0, 100, 1000];
+	myuns32s:	uns32[5]		:= [0, 100, 1000, 10000, 100000];
+
+	lastindex:	uns32 := 4;
+
+begin BookChallengeEleven;
+
+	for (mov(0, ecx); ecx <= lastindex; inc(ecx)) do
+		stdout.putu32Size(ecx, 2, ' ');
+		stdout.put(": ", mybools[ecx], nl);
+	endfor;
+	stdout.newln();
+
+	printArrayData(&myint16s, lastindex, 4);
+	stdout.put(nl, nl);
+
+	stdout.put("Editing int16 array. Be careful on inputs -- not robust.", nl, nl);
+	enterUserValueIntoArray(&myint16s, lastindex, 4);
+
+	enterUserValueIntoArray(&myint16s, lastindex, 4);
+
+	printArrayData(&myint16s, lastindex, 4);
+
+	stdout.put(nl, nl);
+
+	printArrayData(&myuns32s, lastindex, 2);
+
+	stdout.put(nl, nl);
+	stdout.put("Editing uns32 array. Be careful on inputs -- not robust.", nl, nl);
+
+	enterUserValueIntoArray(&myuns32s, lastindex, 2);
+	enterUserValueIntoArray(&myuns32s, lastindex, 2);
+
+	printArrayData(&myuns32s, lastindex, 2);
+	stdout.put(nl, nl);
+
+end BookChallengeEleven;

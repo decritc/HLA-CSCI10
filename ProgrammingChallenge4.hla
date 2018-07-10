@@ -1,0 +1,114 @@
+/*
+ * Programming Challenge #4
+ *
+ * written by			Derek Critchfield
+ * created on			10 August 2017
+ * last modified on		10 August 2017
+ *
+ * This program reads in 4 8-bit variables and stores them in 8-bit registers.
+ * Then reads in 4 16-bit variables and stores them in the 16-bit registers.
+ * Then displays the contents of both in hex and decimal formats. Then reads
+ * in 4 32-bit variables and stores them in the 32-bit registers and displays
+ * them in both hex and decimal formats. Along with the other registers.
+ *
+ */
+program ProgrammingChallenge4;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+
+// procedure forward declarations
+
+// procedure definitions
+
+begin ProgrammingChallenge4;
+
+// program instructions
+stdout.put(nl, "Welcome to the register example program!", nl);
+forever;
+  stdout.put(nl, "Please enter 4 numbers between 0 - 255.", nl);
+  stdout.put("What is your first number: ");
+  stdin.getu8();
+  mov(al,dl);
+  stdin.flushInput();
+  stdout.put("What is your second number: ");
+  stdin.getu8();
+  mov(al,cl);
+  stdin.flushInput();
+  stdout.put("What is your third number: ");
+  stdin.getu8();
+  mov(al,bl);
+  stdin.flushInput();
+  stdout.put("What is your fourth number: ");
+  stdin.getu8();
+  stdin.flushInput();
+  stdout.put(nl, "DL = $", dl,"(",(type uns8 dl),")", nl);
+  stdout.put("CL = $", cl,"(",(type uns8 cl),")", nl);
+  stdout.put("BL = $", bl,"(",(type uns8 bl),")", nl);
+  stdout.put("AL = $", al,"(",(type uns8 al),")", nl);
+
+  stdout.put(nl, "Please enter 4 numbers between 0 - 65535.", nl);
+  stdout.put("What is your first number: ");
+  stdin.getu16();
+  mov(ax,dx);
+  stdin.flushInput();
+  stdout.put("What is your second number: ");
+  stdin.getu16();
+  mov(ax,cx);
+  stdin.flushInput();
+  stdout.put("What is your third number: ");
+  stdin.getu16();
+  mov(ax,bx);
+  stdin.flushInput();
+  stdout.put("What is your fourth number: ");
+  stdin.getu16();
+  stdin.flushInput();
+  stdout.put(nl, "DX = $", dx,"(",(type uns16 dx),")", nl);
+  stdout.put("CX = $", cx,"(",(type uns16 cx),")", nl);
+  stdout.put("BX = $", bx,"(",(type uns16 bx),")", nl);
+  stdout.put("AX = $", ax,"(",(type uns16 ax),")", nl);
+
+  stdout.put(nl, "DL = $", dl,"(",(type uns8 dl),")", nl);
+  stdout.put("CL = $", cl,"(",(type uns8 cl),")", nl);
+  stdout.put("BL = $", bl,"(",(type uns8 bl),")", nl);
+  stdout.put("AL = $", al,"(",(type uns8 al),")", nl);
+
+  stdout.put(nl, "Please enter 4 numbers between 0 - 4,294,967,295.", nl);
+  stdout.put("What is your first number: ");
+  stdin.getu32();
+  mov(eax,edx);
+  stdin.flushInput();
+  stdout.put("What is your second number: ");
+  stdin.getu32();
+  mov(eax,ecx);
+  stdin.flushInput();
+  stdout.put("What is your third number: ");
+  stdin.getu32();
+  mov(eax,ebx);
+  stdin.flushInput();
+  stdout.put("What is your fourth number: ");
+  stdin.getu32();
+  stdin.flushInput();
+  stdout.put(nl, "EDX = $", edx,"(",(type uns32 edx),")", nl);
+  stdout.put("ECX = $", ecx,"(",(type uns32 ecx),")", nl);
+  stdout.put("EBX = $", ebx,"(",(type uns32 ebx),")", nl);
+  stdout.put("EAX = $", eax,"(",(type uns32 eax),")", nl);
+
+  stdout.put(nl, "DX = $", dx,"(",(type uns16 dx),")", nl);
+  stdout.put("CX = $", cx,"(",(type uns16 cx),")", nl);
+  stdout.put("BX = $", bx,"(",(type uns16 bx),")", nl);
+  stdout.put("AX = $", ax,"(",(type uns16 ax),")", nl);
+
+  stdout.put(nl, "DL = $", dl,"(",(type uns8 dl),")", nl);
+  stdout.put("CL = $", cl,"(",(type uns8 cl),")", nl);
+  stdout.put("BL = $", bl,"(",(type uns8 bl),")", nl);
+  stdout.put("AL = $", al,"(",(type uns8 al),")", nl);
+
+  stdout.put(nl, "Would you like run the program again (Y/N):");
+  stdin.getc();
+  breakif(al == 'N' || al == 'n');
+  stdin.flushInput();
+endfor;
+end ProgrammingChallenge4;

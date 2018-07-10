@@ -1,0 +1,172 @@
+/*
+ * ProgrammingChallenge12
+ *
+ * written by			Derek Critchfield
+ * created on			15 November 2017
+ * last modified on		15 November 2017
+ *
+ * This program has the user create an array and allows the user to edit the values
+ * computes and displays the largest value.
+ *
+ */
+program ProgrammingChallenge12;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+static
+  cells: dword;
+
+// procedure forward declarations
+
+procedure displayCells(address: dword; size: uns32; datatype: uns8); @forward;
+procedure editCell(address: dword; index: uns32; datatype: uns8); @forward;
+procedure computeLargest(address: dword; size: uns32; mtype: uns8); @forward;
+
+// procedure definitions
+procedure displayCells(address: dword; size: uns32; datatype: uns8);
+begin displayCells;
+  pushad();
+  mov(address, edx);
+  mov(size, eax);
+  sub(1, eax);
+  stdout.newln();
+  for (mov(0, ecx); ecx<eax; inc(ecx)) do
+    stdout.put("index: ", (type uns32 ecx), " ");
+    if (datatype == 1) then
+      stdout.put("value: " , (type int8 [edx + ecx]), nl);
+    elseif (datatype == 2) then
+      stdout.put("value: " , (type int16 [edx + ecx * 2]), nl);
+    else
+      stdout.put("value: " , (type int32 [edx + ecx * 4]), nl);
+    endif;
+  endfor;
+  stdout.put("Computed Largest: ");
+  add(1, eax);
+  if (datatype == 1) then
+    stdout.put((type int8 [edx + eax]), nl);
+  elseif (datatype == 2) then
+    stdout.put((type int16 [edx + eax * 2]), nl);
+  else
+    stdout.put((type int32 [edx + eax * 4]), nl);
+  endif;
+  stdout.newln();
+  popad();
+end displayCells;
+
+procedure editCell(address: dword; index: uns32; datatype: uns8);
+begin editCell;
+  pushad();
+  mov(address, ebx);
+  mov(index, ecx);
+  if (datatype == 1) then
+    stdout.put("Enter a new int8 value: ");
+    stdin.flushInput();
+    stdin.geti8();
+    mov(al, (type int8 [ebx + ecx]));
+  elseif (datatype == 2) then
+    stdout.put("Enter a new int16 value: ");
+    stdin.flushInput();
+    stdin.geti16();
+    mov(ax, (type int16 [ebx + ecx * 2]));
+  else
+    stdout.put("Enter a new int16 value: ");
+    stdin.flushInput();
+    stdin.geti32();
+    mov(eax,(type int32 [ebx + ecx * 4]));
+  endif;
+  popad();
+end editCell;
+
+procedure computeLargest(address: dword; size: uns32; mtype: uns8);
+begin computeLargest;
+  pushad();
+  mov(address, ebx);
+
+	// assume the first element is the largest
+	mov(0, edx);
+	if (mtype == 1) then
+		mov((type int8 [ebx]), dl);
+	elseif (mtype == 2) then
+		mov((type int16 [ebx]), dx);
+	else
+		mov((type int32 [ebx]), edx);
+	endif;
+
+	// look through the remaining elements to see if any is bigger
+	for (mov(1, ecx); ecx<size; inc(ecx)) do
+		if (mtype == 1) then
+			if ((type int8 [ebx + ecx * 1]) > dl) then
+				mov((type int8 [ebx + ecx * 1]), dl);
+			endif;
+		elseif (mtype == 2) then
+			if ((type int16 [ebx + ecx * 2]) > dx) then
+				mov((type int16 [ebx + ecx * 2]), dx);
+			endif;
+		else
+			if ((type int32 [ebx + ecx * 4]) > edx) then
+				mov((type int32 [ebx + ecx * 4]), edx);
+			endif;
+		endif;
+	endfor;
+
+	// write largest value into "secret/compute" cell
+	if (mtype == 1) then
+		mov(dl, (type int8 [ebx + ecx * 1]));
+	elseif (mtype == 2) then
+		mov(dx, (type int16 [ebx + ecx * 2]));
+	else
+		mov(edx, (type int32 [ebx + ecx * 4]));
+	endif;
+  popad();
+end computeLargest;
+
+begin ProgrammingChallenge12;
+
+// program instructions
+  forever
+    stdout.put("Please enter the number of cells you would like: ");
+    stdin.getu32();
+    add(1, eax);
+    mov(eax, ebx);
+    push(eax);
+    stdin.flushInput();
+    stdout.put("Please enter the datatype you would like to use ", nl);
+    stdout.put("[1 for int8, 2 for int16, and 3 for int32]: ");
+    stdin.getu8();
+    mov(al, cl);
+    stdin.flushInput();
+    pop(eax);
+    if (cl == 1) then
+      mul(@size(int8), eax);
+      stdout.put((type uns32 eax), " bytes allocated!", nl);
+      mem.zalloc(eax);
+    elseif (cl == 2) then
+      mul(@size(int16), eax);
+      stdout.put((type uns32 eax), " bytes allocated!", nl);
+      mem.zalloc(eax);
+    else
+      mul(@size(int32), eax);
+      stdout.put((type uns32 eax), " bytes allocated!", nl);
+      mem.zalloc(eax);
+    endif;
+    mov(eax, cells);
+    forever
+      displayCells(cells, ebx, cl);
+      stdout.put(nl, "Would you like to edit a cell or exit [e/x] ? ");
+      stdin.flushInput();
+      breakif(chars.toUpper(stdin.getc()) == 'X');
+      stdin.flushInput();
+      stdout.put(nl, "Please enter the index of the cell you wish to edit: ");
+      stdin.getu32();
+      editCell(cells, eax, cl);
+      computeLargest(cells, ebx, cl);
+    endfor;
+    mem.free(cells);
+    stdout.put(nl, "Memory has been freed!");
+    stdout.put(nl, "Go again [y/n] ? ");
+    stdin.flushInput();
+    breakif(chars.toUpper(stdin.getc()) == 'N');
+  endfor;
+end ProgrammingChallenge12;

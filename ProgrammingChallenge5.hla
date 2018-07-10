@@ -1,0 +1,141 @@
+/*
+ * Programming Challenge 5
+ *
+ * written by			Derek Critchfield
+ * created on			18 September 2017
+ * last modified on		21 September 2017
+ *
+ * Slot machine simulation where user is given a $1000 bankroll and is allowed
+ * to make wagers before spinning the wheel. Using a random number it spins
+ * the wheel and shows the results. The player can then choose to play again
+ * until either running out of money or until they quit.
+ *
+ */
+program ProgrammingChallenge5;
+
+// includes
+#include ("stdlib.hhf");
+
+// static declarations
+static
+  bankroll: uns16 := 1000;
+  wager: uns16;
+
+
+// procedure forward declarations
+procedure getUns16(prompt:string; min:uns16; max:uns16); @forward;
+procedure showSymbol(sym: uns32); @forward;
+procedure spinOneWheel; @forward;
+procedure spinAllWheels; @forward;
+
+// procedure definitions
+procedure getUns16(prompt:string; min:uns16; max:uns16);
+begin getUns16;
+  forever;
+    try
+      stdout.put (nl, prompt);
+      stdin.flushInput();
+      stdin.getu16();
+      unprotected
+      if (ax >= min && ax <= max) then
+        break;
+      else
+        stdout.put("Enter a value between ", min, " and ", max, ".", nl);
+      endif;
+    anyexception
+      stdout.put ("Try again.", nl);
+    endtry;
+  endfor;
+end getUns16;
+
+procedure showSymbol(sym: uns32);
+begin showSymbol;
+  if (sym = 1) then
+    stdout.put(nl, "@CHERRY@", nl);
+  elseif (sym = 2) then
+    stdout.put(nl, "$MONEY$", nl);
+  else
+    stdout.put(nl, "*STAR*", nl);
+  endif;
+end showSymbol;
+
+procedure spinOneWheel;
+begin spinOneWheel;
+  rand.urange(1,100);
+  if(eax < 80) then
+    mov(1, eax);
+  elseif(eax < 95) then
+    mov(2, eax);
+  else
+    mov(3, eax);
+  endif;
+end spinOneWheel;
+
+procedure spinAllWheels;
+var
+  wheelOne: uns32;
+  wheelTwo: uns32;
+  wheelThree: uns32;
+
+begin spinAllWheels;
+  spinOneWheel();
+  mov(eax, wheelOne);
+  spinOneWheel();
+  mov(eax, wheelTwo);
+  spinOneWheel();
+  mov(eax, wheelThree);
+  showSymbol(wheelOne);
+  showSymbol(wheelTwo);
+  showSymbol(wheelThree);
+  mov(wheelOne, eax);
+  mov(wheelTwo, ebx);
+  mov(wheelThree, ecx);
+  if ( eax = 1 && ebx = 1 && ecx = 1 ) then
+    mov (1, al);
+  elseif ( eax = 2 && ebx = 2 && ecx = 2 ) then
+    mov (2, al);
+  elseif ( eax = 3 && ebx = 3 && ecx = 3 ) then
+    mov (3, al);
+  else
+    mov (0, al);
+  endif;
+end spinAllWheels;
+
+begin ProgrammingChallenge5;
+
+// program instructions
+rand.randomize();
+forever
+  stdout.put(nl, "Welcome to the world's loosest Slot Machine!", nl);
+  stdout.put("You have $", bankroll, ", Good Luck!", nl);
+  getUns16("How much would you like to wager: ", 1, bankroll);
+  mov(ax, wager);
+  stdout.put("You have wagered: $", wager, nl);
+  spinAllWheels();
+  mov(bankroll, bx);
+  if ( al = 1 ) then
+    add(wager, bx);
+  elseif ( al = 2 ) then
+    mov(wager, ax);
+    mul(2, ax);
+    add(ax, bx);
+  elseif ( al = 3 ) then
+    mov(wager, ax);
+    mul(3, ax);
+    add(ax, bx);
+  else
+    sub(wager, bx);
+  endif;
+  mov(bx, bankroll);
+  stdout.put (nl, "Your bankroll is now: $", bankroll, nl);
+  if ( bx = 0 ) then
+    stdout.put ("You have no more money, Good Bye!", nl);
+    break;
+  endif;
+  stdout.put ("Would you like to play again? (Y/N): ");
+  stdin.flushInput();
+  stdin.getc ();
+  breakif (al = 'N' || al = 'n' );
+endfor;
+
+end ProgrammingChallenge5;
